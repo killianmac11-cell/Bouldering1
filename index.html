@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bouldering Tracker</title>
+<style>
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #f2f2f5;
+        text-align: center;
+    }
+
+    h1 {
+        font-weight: 500;
+        margin: 40px 0 20px;
+        font-size: 32px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+    }
+
+    .card {
+        background: #f7f7f9;
+        border-radius: 25px;
+        padding: 30px;
+        box-shadow: 8px 8px 20px rgba(0,0,0,0.05),
+                    -8px -8px 20px rgba(255,255,255,0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.1s ease;
+    }
+
+    .circle:active {
+        transform: scale(0.95);
+    }
+
+    .yellow { background: #f4d03f; }
+    .black  { background: #111; }
+    .pink   { background: #f194a4; }
+    .green  { background: #58b368; }
+    .orange { background: #f39c12; }
+    .red    { background: #e74c3c; }
+    .blue   { background: #3b7ddd; }
+
+    .full {
+        grid-column: span 2;
+    }
+</style>
+</head>
+<body>
+
+<h1 id="total">Problems: 0</h1>
+
+<div class="grid">
+    <div class="card full"><div class="circle yellow"  data-color="yellow">0</div></div>
+    <div class="card"><div class="circle black"  data-color="black">0</div></div>
+    <div class="card"><div class="circle pink"   data-color="pink">0</div></div>
+    <div class="card"><div class="circle green"  data-color="green">0</div></div>
+    <div class="card"><div class="circle orange" data-color="orange">0</div></div>
+    <div class="card"><div class="circle red"    data-color="red">0</div></div>
+    <div class="card"><div class="circle blue"   data-color="blue">0</div></div>
+</div>
+
+<script>
+const circles = document.querySelectorAll(".circle");
+const totalDisplay = document.getElementById("total");
+
+let counts = JSON.parse(localStorage.getItem("boulderCounts")) || {
+    yellow: 0,
+    black: 0,
+    pink: 0,
+    green: 0,
+    orange: 0,
+    red: 0,
+    blue: 0
+};
+
+function updateUI() {
+    let total = 0;
+    circles.forEach(circle => {
+        const color = circle.dataset.color;
+        circle.textContent = counts[color];
+        total += counts[color];
+    });
+    totalDisplay.textContent = "Problems: " + total;
+    localStorage.setItem("boulderCounts", JSON.stringify(counts));
+}
+
+circles.forEach(circle => {
+    let pressTimer;
+
+    circle.addEventListener("click", () => {
+        const color = circle.dataset.color;
+        counts[color]++;
+        updateUI();
+    });
+
+    circle.addEventListener("touchstart", () => {
+        pressTimer = setTimeout(() => {
+            const color = circle.dataset.color;
+            if (counts[color] > 0) counts[color]--;
+            updateUI();
+        }, 600);
+    });
+
+    circle.addEventListener("touchend", () => {
+        clearTimeout(pressTimer);
+    });
+});
+
+totalDisplay.addEventListener("dblclick", () => {
+    if (confirm("Reset all counts?")) {
+        Object.keys(counts).forEach(c => counts[c] = 0);
+        updateUI();
+    }
+});
+
+updateUI();
+</script>
+
+</body>
+</html>
